@@ -1,4 +1,4 @@
-name: Pulumi
+name: Pulumi PR
 on:
   - pull_request
 jobs:
@@ -20,6 +20,6 @@ jobs:
       - uses: pulumi/actions@v3
         with:
           command: preview
-          stack-name: org-name/stack-name # When using an individual account, only use stack-name.  
+          stack-name: aws-cloud-c2 # When using an individual account, only use stack-name.  
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
