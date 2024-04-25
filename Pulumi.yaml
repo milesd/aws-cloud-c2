@@ -12,29 +12,29 @@ config:
   # A path to the EC2 keypair's private key:
   installScriptPath:
     type: string
+    default: install.sh
 
-variables:
-  publicKeyData:
-    fn::fileAsset: ${publicKeyPath}
-  userDataContent: 
-    fn::fileAsset: ${installScriptPath} # Replace with path to your userdata script
+# variables:
+  # publicKeyData:
+  #   fn::fileAsset: ${publicKeyPath}
+  # userDataContent: 
+  #   fn::fileAsset: ${installScriptPath} # Replace with path to your userdata script
 
 resources:
   cc2-keypair:
     type: aws:lightsail:KeyPair
-    name: cc2-keypair
+    # name: cc2-keypair
     properties:
-      name: importing
+      # name: importing
       publicKey:
         fn::invoke:
           function: std:file
           arguments:
             input: ${publicKeyPath}
           return: result
-
-  # Create Lightsail instance, install/configure Cloud C2
-  cc2:
+  cc2-instance:
     type: aws:lightsail:Instance
+    # name: cc2
     properties:
       name: cc2
       availabilityZone: us-west-2a
@@ -47,26 +47,26 @@ resources:
           arguments:
             input: ${installScriptPath}
           return: result
-  # Provide static IP attachment
-  cc2Resource:
-    type: aws:lightsail:StaticIpAttachment
-    name: cc2
-    properties:
-      staticIpName: ${cc2Resource2.id}
-      instanceName: ${cc2.id}
-  cc2Resource2:
+  cc2-ip:
     type: aws:lightsail:StaticIp
-    name: cc2
+    # name: cc2
     properties:
       name: cc2_static_ip
-  # Configure firewall
-  cc2Resource3:
-    type: aws:lightsail:InstancePublicPorts
-    name: cc2
-    options:
-      parent: ${cc2}
+  cc2-ip-attach:
+    type: aws:lightsail:StaticIpAttachment
+    # name: cc2
     properties:
-      instanceName: cc2
+      staticIpName: ${cc2-ip.id}
+      instanceName: ${cc2-instance.id}
+    options:
+      dependsOn:
+        - ${cc2-instance}
+        - ${cc2-ip}
+  cc2-ports:
+    type: aws:lightsail:InstancePublicPorts
+    # name: cc2
+    properties:
+      instanceName: ${cc2-instance.name}
       portInfos:
         - protocol: tcp
           fromPort: 8080
@@ -84,4 +84,4 @@ resources:
 outputs:
   keyPairName: ${cc2-keypair.name}
   publicKeyName: ${cc2-keypair.publicKey}
-  publicIPv4: ${cc2Resource2.ipAddress}
+  publicIPv4: ${cc2-ip.ipAddress}

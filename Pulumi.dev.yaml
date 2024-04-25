@@ -1,0 +1,6 @@
+config:
+  aws-cloud-c2:installScriptPath: install.sh
+  aws-cloud-c2:privateKeyPath: aws-cloud-c2
+  aws-cloud-c2:publicKeyPath: aws-cloud-c2.pub
+  aws:profile: personal
+  aws:region: us-west-2
